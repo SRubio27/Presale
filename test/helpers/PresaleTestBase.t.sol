@@ -41,7 +41,7 @@ contract PresaleTestBase is Test {
             // 0x986C9367f1B3fcF578929b9903987D7b0d2631d1, // R27
             fundsReceiver, // fundsReceiver
             oracleEthUsd, // Oracle of eth price in USD
-            maxSellingAmount, // 30 millones con 18 decimales
+            maxSellingAmount,
             startTime,
             endingTime,
             3000000 * 1e18, // 30 millones con
@@ -53,6 +53,7 @@ contract PresaleTestBase is Test {
 
         uint256 BIG_AMOUNT = 10_000_000 * 1e6; // 10M USDC
 
+        vm.deal(buyer, 100000000000000 ether);
         deal(usdcAddress, buyer, BIG_AMOUNT);
         deal(usdtAddress, buyer, BIG_AMOUNT);
     }

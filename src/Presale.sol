@@ -16,7 +16,7 @@ contract Presale is Ownable {
     address public usdtAddress;
     address public usdcAddress;
     address public saleTokenAddress;
-    address public fundsRecieverAddress;
+    address public fundsReceiverAddress;
     address public dataFeedAddress;
     uint256 public maxSellingAmount;
     uint256 public startingTime;
@@ -39,16 +39,6 @@ contract Presale is Ownable {
         uint256 maxSellingAmount,
         uint256[][3] pases
     );
-
-    // Modifiers
-    modifier userIsNotBlackListed(address user_) {
-        require(blacklist[user_] == false, "USER_IS_IN_BLACKLIST");
-        _;
-    }
-    modifier userIsBlackListed(address user_) {
-        require(blacklist[user_] == true, "USER_IS_IN_BLACKLIST");
-        _;
-    }
 
     constructor(
         address usdtAddress_,
@@ -73,7 +63,7 @@ contract Presale is Ownable {
         usdtAddress = usdtAddress_;
         usdcAddress = usdcAddress_;
         saleTokenAddress = address(mockToken);
-        fundsRecieverAddress = fundsRecieverAddress_;
+        fundsReceiverAddress = fundsRecieverAddress_;
         dataFeedAddress = dataFeedAddress_; // 0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612 (Oracle of eth price in USD)
         maxSellingAmount = maxSellingAmount_;
         startingTime = startingTime_;
@@ -88,7 +78,7 @@ contract Presale is Ownable {
 
         emit ContractDeployed(
             msg.sender,
-            fundsRecieverAddress,
+            fundsReceiverAddress,
             maxSellingAmount,
             phases
         );
@@ -102,7 +92,9 @@ contract Presale is Ownable {
     function buyWithStableCoins(
         address tokenUsedToBuy_,
         uint256 amount_
-    ) external userIsNotBlackListed(msg.sender) {
+    ) external {
+        require(blacklist[msg.sender] != true, "USER_IS_BLACKLISTED");
+
         require(block.timestamp >= startingTime, "PRESALE_HAS_NOT_START_YET");
         require(block.timestamp <= endingTime, "PRESALE_IS_FINISHED");
         require(
@@ -121,14 +113,14 @@ contract Presale is Ownable {
                     1e6) /
                 phases[currentPhase][1];
 
-        checkCurrentPhase(tokenAmountToReceive);
+        _checkCurrentPhase(tokenAmountToReceive);
         require(
             totalSold + tokenAmountToReceive <= maxSellingAmount,
             "MAX_SELLING_AMOUNT_EXCEEDED"
         );
         IERC20(tokenUsedToBuy_).safeTransferFrom(
             msg.sender,
-            fundsRecieverAddress,
+            fundsReceiverAddress,
             amount_
         );
 
@@ -139,11 +131,10 @@ contract Presale is Ownable {
 
     /**
      * Used for buy tokens with ether
-     * @param to_ address to set the tokens
      */
-    function buyWithEther(
-        address to_
-    ) external payable userIsNotBlackListed(to_) {
+    function buyWithEther() external payable {
+        require(blacklist[msg.sender] != true, "USER_IS_BLACKLISTED");
+
         require(block.timestamp >= startingTime, "PRESALE_HAS_NOT_START_YET");
         require(block.timestamp <= endingTime, "PRESALE_IS_FINISHED");
 
@@ -153,12 +144,12 @@ contract Presale is Ownable {
 
         tokenAmountToReceive = (usdValue * 1e6) / phases[currentPhase][1];
 
-        checkCurrentPhase(tokenAmountToReceive);
+        _checkCurrentPhase(tokenAmountToReceive);
         require(
             totalSold + tokenAmountToReceive <= maxSellingAmount,
             "MAX_SELLING_AMOUNT_EXCEEDED"
         );
-        (bool success, ) = fundsRecieverAddress.call{value: msg.value}("");
+        (bool success, ) = fundsReceiverAddress.call{value: msg.value}("");
         require(success, "TRANSFER_FAILED");
         userTokensBalance[msg.sender] += tokenAmountToReceive;
 
@@ -195,7 +186,7 @@ contract Presale is Ownable {
      * Used internly check current phase(used in buys to check)
      * @param amount_ amount to calculate the current phase
      */
-    function checkCurrentPhase(
+    function _checkCurrentPhase(
         uint256 amount_
     ) private returns (uint256 phase) {
         if (
@@ -210,9 +201,7 @@ contract Presale is Ownable {
      * Used to set users in blacklist
      * @param user_ the address of the user to add in the blacklist
      */
-    function setUserInBlackList(
-        address user_
-    ) external onlyOwner userIsBlackListed(user_) {
+    function blackListUser(address user_) external onlyOwner {
         blacklist[user_] = true;
     }
 
@@ -220,9 +209,7 @@ contract Presale is Ownable {
      * Used to remove users from the blacklist
      * @param user_ the address of the user to remove in the blacklist
      */
-    function removeUserInBlacklist(
-        address user_
-    ) external onlyOwner userIsNotBlackListed(user_) {
+    function removeBlacklist(address user_) external onlyOwner {
         blacklist[user_] = false;
     }
 

@@ -1,0 +1,12 @@
+{
+  "solidity-va.mode.active": true,
+  "solidity-va.findAllReferences.enable": true,
+  "solidity-va.hover": true,
+  "solidity-va.outline.decorations": true,
+  "solidity-va.outline.enable": true,
+  "solidity-va.outline.extras": true,
+  "solidity-va.outline.inheritance.show": true,
+  "solidity-va.outline.var.storage_annotations": true,
+  "solidity-va.outline.pragmas.show": true,
+  "solidity-va.overviewruler.decorations.enable": false
+}

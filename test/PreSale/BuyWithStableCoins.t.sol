@@ -5,9 +5,20 @@ pragma solidity 0.8.28;
 import {PresaleTestBase} from "test/helpers/PresaleTestBase.t.sol";
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import {console} from "forge-std/console.sol";
 
 contract buyWithStableCoinsTest is PresaleTestBase {
+    function testBuyWithStableCoin_RevertIfBuyerIsBlackListed() public {
+        vm.startPrank(owner);
+        presale.blackListUser(buyer);
+        vm.stopPrank();
+        vm.startPrank(buyer);
+
+        vm.expectRevert("USER_IS_BLACKLISTED");
+        presale.buyWithStableCoins(usdcAddress, 1);
+
+        vm.stopPrank();
+    }
+
     function testReverIfMaxSupplyExceeded() public {
         vm.startPrank(buyer);
         uint256 amountIn_ = maxSellingAmount + 10 * 1e6;
@@ -39,7 +50,7 @@ contract buyWithStableCoinsTest is PresaleTestBase {
         vm.stopPrank();
     }
 
-    function testBuyWithStableCoinsCorrectly() public {
+    function testBuyWithUsdcCorrectly() public {
         vm.startPrank(buyer);
         uint256 amountToBuy_ = 10e6;
         IERC20(usdcAddress).approve(address(presale), amountToBuy_);
@@ -63,6 +74,40 @@ contract buyWithStableCoinsTest is PresaleTestBase {
             fundsReceiver
         );
         uint256 usdcBuyerAfter_ = IERC20(usdcAddress).balanceOf(buyer);
+
+        assertEq(userTokensAfter_ - userTokensBefore_, expectedTokens);
+        assertEq(totalTokensAfter_ - totalTokensBefore_, expectedTokens);
+        assertEq(
+            usdcBuyerBefore_ - usdcBuyerAfter_,
+            usdcReceiverAfter_ - usdcReceiverBefore_
+        );
+        vm.stopPrank();
+    }
+
+    function testBuyWithUsdtCorrectly() public {
+        vm.startPrank(buyer);
+        uint256 amountToBuy_ = 10e6;
+        IERC20(usdtAddress).approve(address(presale), amountToBuy_);
+
+        uint256 totalTokensBefore_ = presale.totalSold();
+        uint256 userTokensBefore_ = presale.userTokensBalance(buyer);
+        uint256 usdcReceiverBefore_ = IERC20(usdtAddress).balanceOf(
+            fundsReceiver
+        );
+        uint256 usdcBuyerBefore_ = IERC20(usdtAddress).balanceOf(buyer);
+
+        uint256 expectedTokens = (amountToBuy_ *
+            10 ** (18 - ERC20(usdtAddress).decimals()) *
+            1e6) / phases[presale.currentPhase()][1];
+
+        presale.buyWithStableCoins(usdtAddress, amountToBuy_);
+        uint256 totalTokensAfter_ = presale.totalSold();
+        uint256 userTokensAfter_ = presale.userTokensBalance(buyer);
+
+        uint256 usdcReceiverAfter_ = IERC20(usdtAddress).balanceOf(
+            fundsReceiver
+        );
+        uint256 usdcBuyerAfter_ = IERC20(usdtAddress).balanceOf(buyer);
 
         assertEq(userTokensAfter_ - userTokensBefore_, expectedTokens);
         assertEq(totalTokensAfter_ - totalTokensBefore_, expectedTokens);

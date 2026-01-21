@@ -4,9 +4,6 @@ pragma solidity 0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {Presale} from "src/Presale.sol";
-import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import {IAggregator} from "src/interfaces/IAggregator.sol";
 
 /*
  forge coverage --fork-url https://1rpc.io/arb
@@ -30,8 +27,8 @@ contract PresaleTestBase is Test {
     // vm.roll(blockNumber) para movernos a traves de bloques
     function setUp() public {
         phases[0] = [1000000 * 1e18, 5 * 1e3, startTime + 30 days];
-        phases[1] = [1000000 * 1e18, 1 * 1e4, startTime + 60 days];
-        phases[2] = [1000000 * 1e18, 15 * 1e4, startTime + 90 days];
+        phases[1] = [2000000 * 1e18, 1 * 1e4, startTime + 60 days];
+        phases[2] = [maxSellingAmount, 15 * 1e4, startTime + 90 days];
 
         vm.startPrank(owner);
 

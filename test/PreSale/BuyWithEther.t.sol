@@ -3,8 +3,6 @@
 pragma solidity 0.8.28;
 
 import {PresaleTestBase} from "test/helpers/PresaleTestBase.t.sol";
-import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {IAggregator} from "src/interfaces/IAggregator.sol";
 import {console} from "forge-std/console.sol";
 

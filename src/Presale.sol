@@ -183,14 +183,14 @@ contract Presale is Ownable {
     }
 
     /**
-     * Used internly check current phase(used in buys to check)
+     * Used internly to calculate current phase
      * @param amount_ amount to calculate the current phase
      */
     function _checkCurrentPhase(
         uint256 amount_
     ) private returns (uint256 phase) {
         if (
-            (totalSold + amount_ > phases[currentPhase][0] ||
+            (totalSold + amount_ >= phases[currentPhase][0] ||
                 block.timestamp >= phases[currentPhase][2]) && phase < 3
         ) currentPhase++;
 
@@ -228,7 +228,7 @@ contract Presale is Ownable {
     /**
      * Used to remove the ethers of the contract in emergencies (this contract should not contain ether)
      */
-    function emergencyETHWithdraw() external onlyOwner {
+    function emergencyEthWithdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         (bool success, ) = msg.sender.call{value: balance}("");
         require(success = true, "RANSACTION_FAILED");

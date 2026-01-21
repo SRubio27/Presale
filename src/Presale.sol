@@ -29,7 +29,7 @@ contract Presale is Ownable {
 
     uint256 public totalSold;
     uint256 public currentPhase = 0;
-    mapping(address => bool) public blacklist;
+    mapping(address => bool) public isBlacklisted;
     mapping(address => uint256) public userTokensBalance;
 
     // Events
@@ -93,7 +93,7 @@ contract Presale is Ownable {
         address tokenUsedToBuy_,
         uint256 amount_
     ) external {
-        require(blacklist[msg.sender] != true, "USER_IS_BLACKLISTED");
+        require(isBlacklisted[msg.sender] != true, "USER_IS_BLACKLISTED");
 
         require(block.timestamp >= startingTime, "PRESALE_HAS_NOT_START_YET");
         require(block.timestamp <= endingTime, "PRESALE_IS_FINISHED");
@@ -133,7 +133,7 @@ contract Presale is Ownable {
      * Used for buy tokens with ether
      */
     function buyWithEther() external payable {
-        require(blacklist[msg.sender] != true, "USER_IS_BLACKLISTED");
+        require(isBlacklisted[msg.sender] != true, "USER_IS_BLACKLISTED");
 
         require(block.timestamp >= startingTime, "PRESALE_HAS_NOT_START_YET");
         require(block.timestamp <= endingTime, "PRESALE_IS_FINISHED");
@@ -202,7 +202,7 @@ contract Presale is Ownable {
      * @param user_ the address of the user to add in the blacklist
      */
     function blackListUser(address user_) external onlyOwner {
-        blacklist[user_] = true;
+        isBlacklisted[user_] = true;
     }
 
     /**
@@ -210,7 +210,7 @@ contract Presale is Ownable {
      * @param user_ the address of the user to remove in the blacklist
      */
     function removeBlacklist(address user_) external onlyOwner {
-        blacklist[user_] = false;
+        isBlacklisted[user_] = false;
     }
 
     /**
@@ -233,4 +233,6 @@ contract Presale is Ownable {
         (bool success, ) = msg.sender.call{value: balance}("");
         require(success = true, "RANSACTION_FAILED");
     }
+
+    receive() external payable {}
 }

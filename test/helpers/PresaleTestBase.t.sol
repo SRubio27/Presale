@@ -51,6 +51,9 @@ contract PresaleTestBase is Test {
         uint256 BIG_AMOUNT = 10_000_000 * 1e6; // 10M USDC
 
         vm.deal(buyer, 100000000000000 ether);
+        vm.deal(owner, 100000000000000 ether);
+        deal(usdcAddress, owner, BIG_AMOUNT);
+        deal(usdtAddress, owner, BIG_AMOUNT);
         deal(usdcAddress, buyer, BIG_AMOUNT);
         deal(usdtAddress, buyer, BIG_AMOUNT);
     }
